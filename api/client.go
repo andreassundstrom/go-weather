@@ -14,7 +14,7 @@ func GetWeather(lat float32, lon float32) (WeatherResponse, error) {
 	var weatherResponse WeatherResponse
 
 	url := fmt.Sprintf("%s/api/category/pmp3g/version/2/geotype/point/lon/%f/lat/%f/data.json", baseUrl, lon, lat)
-	fmt.Printf("Getting weather data from %s\n", url)
+
 	response, err := http.Get(url)
 	if err != nil {
 		return weatherResponse, nil
