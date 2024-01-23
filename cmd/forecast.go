@@ -13,6 +13,11 @@ func init() {
 	rootCmd.AddCommand(forecastCmd)
 }
 
+type weatherData struct {
+	maxTemp       float32
+	precipitation float32
+}
+
 var forecastCmd = &cobra.Command{
 	Use:   "forecast",
 	Short: "Get current weather forecast",
@@ -29,25 +34,41 @@ func forecast() {
 		return
 	}
 
-	forecastData := make(map[string]float32)
+	forecastData := make(map[string]weatherData)
 
 	for _, timeSeries := range weatherResponse.TimeSeries {
+
+		parsedTime, err := time.Parse(time.RFC3339, timeSeries.ValidTime)
+		if err != nil {
+			fmt.Println("Failed to parse time: ", err)
+		}
+		date := parsedTime.Local().Format(time.DateOnly)
+		currentWeatherData := weatherData{}
+
 		for _, parameter := range timeSeries.Parameters {
 			if parameter.Name == "t" {
-				parsedTime, err := time.Parse(time.RFC3339, timeSeries.ValidTime)
-				if err != nil {
-					fmt.Println("Failed to parse time: ", err)
-				}
-				date := parsedTime.Local().Format(time.DateOnly)
-				newValue := parameter.Values[0]
-				if currentValue, ok := forecastData[date]; ok {
-					if currentValue < newValue {
-						forecastData[date] = newValue
-					}
-				} else {
-					forecastData[date] = newValue
+				currentWeatherData.maxTemp = parameter.Values[0]
+			} else if parameter.Name == "pmean" {
+				currentWeatherData.precipitation = parameter.Values[0]
+			}
+		}
+
+		if _, exists := forecastData[date]; exists {
+			if forecastData[date].maxTemp < currentWeatherData.maxTemp {
+				forecastData[date] = weatherData{
+					maxTemp:       currentWeatherData.maxTemp,
+					precipitation: forecastData[date].precipitation,
 				}
 			}
+
+			if forecastData[date].precipitation < currentWeatherData.precipitation {
+				forecastData[date] = weatherData{
+					maxTemp:       forecastData[date].maxTemp,
+					precipitation: currentWeatherData.precipitation,
+				}
+			}
+		} else {
+			forecastData[date] = currentWeatherData
 		}
 	}
 
@@ -59,7 +80,11 @@ func forecast() {
 	sort.Strings(dates)
 
 	/* Print the dates */
+	fmt.Println("============================================")
+	fmt.Println("Date\t\tMaxTemp\tPrecipitation (mm/h)")
+	fmt.Println("============================================")
 	for _, date := range dates {
-		fmt.Println(fmt.Sprintf("%s: %.0f°C", date, forecastData[date]))
+
+		fmt.Println(fmt.Sprintf("%s\t%.0f°C\t%.0f", date, forecastData[date].maxTemp, forecastData[date].precipitation))
 	}
 }
