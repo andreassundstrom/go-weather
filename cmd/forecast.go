@@ -43,14 +43,10 @@ func forecast() {
 			fmt.Println("Failed to parse time: ", err)
 		}
 		date := parsedTime.Local().Format(time.DateOnly)
-		currentWeatherData := weatherData{}
 
-		for _, parameter := range timeSeries.Parameters {
-			if parameter.Name == "t" {
-				currentWeatherData.maxTemp = parameter.Values[0]
-			} else if parameter.Name == "pmean" {
-				currentWeatherData.precipitation = parameter.Values[0]
-			}
+		currentWeatherData := weatherData{
+			maxTemp:       timeSeries.GetParameter(api.Temperature),
+			precipitation: timeSeries.GetParameter(api.PrecipitationMean),
 		}
 
 		if _, exists := forecastData[date]; exists {
