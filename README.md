@@ -3,7 +3,7 @@
 This cli calls the SMHI weather API:
 
 ```ps
-go run .\go-weather forecast
+go-weather forecast
 ```
 
 ## Build
