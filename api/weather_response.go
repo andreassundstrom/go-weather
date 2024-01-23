@@ -1,7 +1,13 @@
 package api
 
+import (
+	"fmt"
+	"time"
+)
+
 const Temperature = "t"
 const PrecipitationMean = "pmean"
+const WeatherSymbol = "Wsymb2"
 
 type WeatherResponse struct {
 	ApprovedTime  string      `json:"approvedTime"`
@@ -22,6 +28,14 @@ type Parameter struct {
 	Values    []float32 `json:"values"`
 }
 
+func (timeSerie *TimeSerie) GetValidDate() string {
+	parsedTime, err := time.Parse(time.RFC3339, timeSerie.ValidTime)
+	if err != nil {
+		fmt.Println("Failed to parse time: ", err)
+	}
+	return parsedTime.Local().Format(time.DateOnly)
+}
+
 func (timeSeries *TimeSerie) GetParameter(parameterType string) float32 {
 
 	for _, parameter := range timeSeries.Parameters {
@@ -29,5 +43,5 @@ func (timeSeries *TimeSerie) GetParameter(parameterType string) float32 {
 			return parameter.Values[0]
 		}
 	}
-	return 0.
+	panic(fmt.Sprintf("Failed to get parameter of type %s", parameterType))
 }
