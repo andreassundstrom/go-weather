@@ -3,6 +3,7 @@ package cmd
 import (
 	"andreassundstrom/go-weather/api"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -49,7 +50,16 @@ func forecast() {
 			}
 		}
 	}
-	for date, temp := range forecastData {
-		fmt.Println(fmt.Sprintf("%s: %.1f°C", date, temp))
+
+	/* Sort the dates */
+	dates := make([]string, 0, len(forecastData))
+	for k := range forecastData {
+		dates = append(dates, k)
+	}
+	sort.Strings(dates)
+
+	/* Print the dates */
+	for _, date := range dates {
+		fmt.Println(fmt.Sprintf("%s: %.0f°C", date, forecastData[date]))
 	}
 }
