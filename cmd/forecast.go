@@ -108,6 +108,15 @@ func getForecastSymbol(symbol float32) string {
 	// Heavy rain
 	case 20.:
 		return "☔☔☔"
+  // Light sleet (slaks)
+  case 22.:
+    return "❄️☔"
+  // Moderate sleet
+  case 23.:
+    return "❄️☔❄️☔"
+  // Heavy sleet
+  case 24.:
+    return "❄️☔❄️☔❄️☔"
 	// Light snowfall
 	case 25.:
 		return "❄️"
